@@ -1,26 +1,16 @@
 FROM alpine:latest
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG VERSION=0.20.1
+ARG PB_VERSION=0.22.6
 
-ENV BUILDX_ARCH="${TARGETOS:-linux}_${TARGETARCH:-amd64}"
-
-# Install the dependencies
 RUN apk add --no-cache \
-    ca-certificates \
-    unzip
+    unzip \
+    ca-certificates
 
-# RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${VERSION}/pocketbase_${VERSION}_${BUILDX_ARCH}.zip /tmp/pb.zip
-# RUN unzip /tmp/pb.zip -d /usr/local/bin/pocketbase/
+# download and unzip PocketBase
+ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
+RUN unzip /tmp/pb.zip -d /pb/
 
-RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${VERSION}/pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
-    && unzip pocketbase_${VERSION}_${BUILDX_ARCH}.zip -d /usr/local/bin/pocketbase/
-RUN chmod +x /usr/local/bin/pocketbase/pocketbase
+EXPOSE 8080
 
-WORKDIR /usr/local/bin/pocketbase
-COPY . .
-
-EXPOSE 8090
-
-CMD ["/usr/local/bin/pocketbase/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data", "--publicDir=/pb_public"]
+# start PocketBase
+CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8080"]
